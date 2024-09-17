@@ -1,0 +1,152 @@
+---
+title: "Homework4"
+author: "Patrick Seebold"
+format: pdf
+editor: visual
+---
+
+```{r}
+# start by opening some libraries we will need
+library(readr) # for loading data
+library(readxl) # for excel files
+library(dplyr) # for manipulating data
+```
+
+## Question 1: Conceptual Questions
+
+1.1) If your working directory is myfolder/homework/, what relative path would you specify to get the file located at myfolder/MyData.csv?
+
+> With this setup, our relative path to the specified file would be "../MyData.csv"
+
+1.2.) What are the major benefits of using R projects?
+
+> R projects are glorious things! They let easily integrate with github, which makes collaborations much easier. Also, they make switching between and resuming projects much easier. I've had many Rprojects over the course of my PhD and MStat training, and keeping every project in its own Rproject made it easier to switch between projects and to ensure all the relevant components stayed with each one.
+
+1.3) What is git and what is github?
+
+> Git is a version control software which helps us keep track of past versions of our projects. Github is an online platform that allows us to store and share projects with other data scientists. It integrates nicely with git, allowing us to push and pull our local version-controlled projects to a remote repository.
+
+1.4) What are the two main differences between a tibble and a data.frame?
+
+> We discussed two main differences between tibbles, which are updated versions of data frames that "do less and complain more". This is meant to make it easier for us to see the problems in our data and solve them more quickly. The two examples we discussed in lecture was that they provide a fancier print output, and they do not coerce columns down to vectors when using the \[\] notation.
+
+1.5). Rewrite the following nested function call using BaseR’s chaining operator: arrange(filter(select(as_tibble(iris), starts_with("Petal"), Species), Petal.Length \< 1.55), Species)
+
+```{r}
+# this is easier to show the format in a coding chunk!
+iris |>
+  as_tibble() |>
+  select(starts_with("Petal"), Species) |>
+  filter(Petal.Length < 1.55) |>
+  arrange(Species)
+```
+
+## Task 2: Reading Delimited data
+
+```{r}
+glass = read_csv('https://www4.stat.ncsu.edu/~online/datasets/glass.data',
+                 col_names = c('Id','RI','Na','Mg','Al','Si','K','Ca',
+                               'Ba', 'Fe','Type_of_glass'))
+glass # print out the tibble by calling the name
+```
+
+This completes the first step of this task. Now we handle parts 2 and 3, where we will chain our functions to mutate and filter our tibble.
+
+```{r}
+# Now start the chain to add the factor vector for type of glass
+glass |> # first we feed our glass tibble to mutate, which includes the factor()
+  mutate(Type_of_glass = factor(Type_of_glass,levels = c(1,2,3,4,5,6,7),
+         labels = c("building_windows_float_processed",  
+                    "building_windows_non_float_processed",
+                    "vehicle_windows_float_processed", 
+                    "vehicle_windows_non_float_processed",
+                    "containers", "tableware", "headlamp")))|>
+  # then we filter our the specific subset we want with filter()!
+  filter(Fe < 0.2 & Type_of_glass %in% c('tableware','headlamp'))
+
+```
+
+We see that only 38 of our total observations meet these criteria, and they are now contained within the tibble above.
+
+# Yeast Data:
+
+Now we will do the second part of Task 2 with the yeast data. First we get the data:
+
+```{r}
+yeast = read_table("https://www4.stat.ncsu.edu/~online/datasets/yeast.data",
+                   col_names = c("seq_name","mcg","gvh","alm","mit",
+                                 "erl","pox","vac","nuc","class"))
+yeast # print out the tibble - all looks good!
+```
+
+Now we can start our chain to make the desired changes:
+
+```{r}
+# first remove seq_name and nuc columns
+yeast_processed = yeast|>
+  select(c(mcg, gvh,alm,mit,erl,pox,vac,class))|> # select all but  seqname & nuc
+  group_by(class)|> # group by class before adding the new columns
+  mutate(across(where(is.numeric), list(mean = mean,median = median),
+                .names= "{.col}_{.fn}")) # we can tell .names to use the fn as
+                                        # as well as the names for each measure
+yeast_processed # view the updated version of the yeast data
+```
+
+## Task 3: Combining Data Sets
+
+Now we can move onto our final task - merging these two wine data sets.
+
+```{r}
+# first, load in the first sheet of the xlsx white wine sheet already in our wd
+white_wine = read_excel("white-wine.xlsx", sheet = "white-wine")
+white_wine 
+```
+
+Since some of our titles have spaces, we will replace them with versions without spaces, which we can grab from the second sheet of the excel:
+
+```{r}
+white_wine_titles = read_excel("white-wine.xlsx", sheet = "variables")
+white_wine_titles = white_wine_titles$Variables # change this to character vector
+                                                # for use with colnames
+
+colnames(white_wine) = white_wine_titles # set the new names to white_wine tibble
+# Finally, add a wine type column where all of these are white
+white_wine$wine_type = 'white' # nice and simple!
+
+white_wine # success! We now have the proper names and the wine_type variable
+```
+
+Now let's do the same for the red wine. This time we can read directly from the URL:
+
+```{r}
+red_wine = read_delim("https://www4.stat.ncsu.edu/~online/datasets/red-wine.csv",";")
+# The column types are correct - interestingly, they were NOT when I tried open_csv2!
+colnames(red_wine) = white_wine_titles # we can use same names as before
+                                      
+# add the wine_type column here too
+red_wine$wine_type = 'red'
+red_wine
+```
+
+Now we have both wine sets in the same format with the wine_type variable added. Next, we will combine the two together:
+
+```{r}
+# combine the two tibbles as specified
+full_wine = dplyr::bind_rows(white_wine,red_wine)
+full_wine
+```
+
+Now we can do our final chain:
+
+```{r}
+processed_full_wine = full_wine|>
+  filter(quality > 6.5 & alcohol < 132) |>
+  arrange(desc(quality))|>
+  select(contains('acid'),alcohol, wine_type, quality)|>
+  group_by(quality)|>
+  mutate(across(alcohol, list(mean = mean,sd = sd),
+                .names= "{.col}_{.fn}"))
+processed_full_wine
+```
+
+We now have our updated tibble, complete with the alcohol mean and sd for each quality level!
