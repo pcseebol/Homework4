@@ -20,7 +20,7 @@ library(dplyr) # for manipulating data
 
 1.2.) What are the major benefits of using R projects?
 
-> R projects are glorious things! They let easily integrate with github, which makes collaborations much easier. Also, they make switching between and resuming projects much easier since they the R environment for that project. I've had many Rprojects over the course of my PhD and MStat training, and keeping every project in its own Rproject made it easier to switch between them without losing track of things.
+> R projects are glorious things! They let easily integrate with github, which makes collaborations much easier. Also, they make switching between and resuming projects much easier since save they the R environment for that project. I've had many Rprojects over the course of my PhD and MStat training, and keeping every project in its own Rproject made it easier to switch between them without losing track of things.
 
 1.3) What is git and what is github?
 
