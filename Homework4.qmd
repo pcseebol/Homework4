@@ -20,15 +20,15 @@ library(dplyr) # for manipulating data
 
 1.2.) What are the major benefits of using R projects?
 
-> R projects are glorious things! They let easily integrate with github, which makes collaborations much easier. Also, they make switching between and resuming projects much easier. I've had many Rprojects over the course of my PhD and MStat training, and keeping every project in its own Rproject made it easier to switch between projects and to ensure all the relevant components stayed with each one.
+> R projects are glorious things! They let easily integrate with github, which makes collaborations much easier. Also, they make switching between and resuming projects much easier since they the R environment for that project. I've had many Rprojects over the course of my PhD and MStat training, and keeping every project in its own Rproject made it easier to switch between them without losing track of things.
 
 1.3) What is git and what is github?
 
-> Git is a version control software which helps us keep track of past versions of our projects. Github is an online platform that allows us to store and share projects with other data scientists. It integrates nicely with git, allowing us to push and pull our local version-controlled projects to a remote repository.
+> Git is a version control software which helps us keep track of past versions of our projects. Github is an online platform that allows us to store and share projects with other data scientists/programmers. It integrates nicely with git, allowing us to push and pull our local version-controlled projects to a remote repository.
 
 1.4) What are the two main differences between a tibble and a data.frame?
 
-> We discussed two main differences between tibbles, which are updated versions of data frames that "do less and complain more". This is meant to make it easier for us to see the problems in our data and solve them more quickly. The two examples we discussed in lecture was that they provide a fancier print output, and they do not coerce columns down to vectors when using the \[\] notation.
+> We discussed two main differences between tibbles, which are updated versions of data frames that "do less and complain more". This is meant to make it easier for us to see the problems in our data and solve them more quickly. The two examples we discussed in lecture were that they provide a fancier print output, and they do not coerce columns down to vectors when using the \[ \] notation.
 
 1.5). Rewrite the following nested function call using BaseR’s chaining operator: arrange(filter(select(as_tibble(iris), starts_with("Petal"), Species), Petal.Length \< 1.55), Species)
 
@@ -42,6 +42,7 @@ iris |>
 ```
 
 ## Task 2: Reading Delimited data
+First we load in our glass data from the online source:
 
 ```{r}
 glass = read_csv('https://www4.stat.ncsu.edu/~online/datasets/glass.data',
@@ -50,7 +51,7 @@ glass = read_csv('https://www4.stat.ncsu.edu/~online/datasets/glass.data',
 glass # print out the tibble by calling the name
 ```
 
-This completes the first step of this task. Now we handle parts 2 and 3, where we will chain our functions to mutate and filter our tibble.
+This completes the first step of this task. Now we handle parts 2 and 3, where we will chain our functions to mutate and filter our tibble as specified.
 
 ```{r}
 # Now start the chain to add the factor vector for type of glass
@@ -127,6 +128,7 @@ colnames(red_wine) = white_wine_titles # we can use same names as before
 red_wine$wine_type = 'red'
 red_wine
 ```
+
 
 Now we have both wine sets in the same format with the wine_type variable added. Next, we will combine the two together:
 
